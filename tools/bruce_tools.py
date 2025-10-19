@@ -16,7 +16,6 @@ from data_functions import (
     query_genome_by_id,
     query_genome_by_species,
     query_genome_by_genome_name,
-    query_genome_feature_by_gene,
     query_genome_feature_by_genome_id,
     query_genome_feature_by_id,
     query_genome_feature_by_filters,
