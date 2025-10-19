@@ -314,3 +314,34 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             print(message)
             return message
 
+    @mcp.tool()
+    def bvbrc_genome_amr_get_by_drug(drug_name: str, limit: int = _default_limit,
+                                        select: Optional[str] = None, sort: Optional[str] = None) -> str:
+        """
+        Get genome anti-microbial resistance data by drug name.
+        
+        Args:
+            drug_name: The drug name to query (e.g., "ampicillin")
+            limit: Maximum number of results to return (default: 1000)
+            select: Comma-separated list of fields to select (optional)
+            sort: Field to sort by (optional)
+        
+        Returns:
+            Data for antibiotic drugs to which the genome is susceptible or resistant
+        """
+        print(f"Get amr data for {drug_name}")
+        options = {"limit": limit}
+        if select:
+            options["select"] = select.split(",")
+        if sort:
+            options["sort"] = sort
+
+        filter_spec = { "antibiotic" : drug_name }
+
+        try:
+            result = query_genome_amr_by_filters(filter_spec, options, _base_url)
+            return format_query_result(result)
+        except Exception as e:
+            message = f"Error querying genome amr data by drug name: {str(e)}"
+            print(message)
+            return message
