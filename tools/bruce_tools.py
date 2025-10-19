@@ -282,36 +282,35 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             print(message)
             return message
 
-    @mcp.tool()
-    def bvbrc_genome_amr_get_by_genome_id(genome_id: str, limit: int = _default_limit,
-                                        select: Optional[str] = None, sort: Optional[str] = None) -> str:
-        """
-        Get genome anti-microbial resistance data by genome ID.
+    # @mcp.tool()
+    # def bvbrc_genome_amr_get_by_genome_id(genome_id: str, limit: int = _default_limit,
+    #                                     select: Optional[str] = None, sort: Optional[str] = None) -> str:
+    #     """
+    #     Get genome anti-microbial resistance data by genome ID.
         
-        Args:
-            genome_id: The genome ID to query
-            limit: Maximum number of results to return (default: 1000)
-            select: Comma-separated list of fields to select (optional)
-            sort: Field to sort by (optional)
+    #     Args:
+    #         genome_id: The genome ID to query
+    #         limit: Maximum number of results to return (default: 1000)
+    #         select: Comma-separated list of fields to select (optional)
+    #         sort: Field to sort by (optional)
         
-        Returns:
-            Data for antibiotic drugs to which the genome is susceptible or resistant
-        """
-        print(f"Get amr data for {genome_id}")
-        options = {"limit": limit}
-        if select:
-            options["select"] = select.split(",")
-        if sort:
-            options["sort"] = sort
+    #     Returns:
+    #         Data for antibiotic drugs to which the genome is susceptible or resistant
+    #     """
+    #     print(f"Get amr data for {genome_id}")
+    #     options = {"limit": limit}
+    #     if select:
+    #         options["select"] = select.split(",")
+    #     if sort:
+    #         options["sort"] = sort
         
-        filter_spec = { "genome_id" : genome_id }
+    #     filter_spec = { "genome_id" : genome_id }
 
-        try:
-            result = query_genome_amr_by_filters(filter_spec, options, _base_url)
-            return format_query_result(result)
-        except Exception as e:
-            message = f"Error querying genome amr data by genome ID: {str(e)}"
-            print(message)
-            return message
-
+    #     try:
+    #         result = query_genome_amr_by_filters(filter_spec, options, _base_url)
+    #         return format_query_result(result)
+    #     except Exception as e:
+    #         message = f"Error querying genome amr data by genome ID: {str(e)}"
+    #         print(message)
+    #         return message
 
