@@ -21,6 +21,7 @@ from data_functions import (
     query_genome_feature_by_filters,
     query_genome_amr_by_filters,
     query_antibiotics_by_filters,
+    query_sp_gene_by_filters,
     format_query_result
 )
 
@@ -404,6 +405,38 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
 
         try:
             result = query_antibiotics_by_filters(filter_spec, options, _base_url)
+            return format_query_result(result)
+        except Exception as e:
+            message = f"Error querying genome amr data by drug and genome name: {str(e)}"
+            print(message)
+            return message
+
+    @mcp.tool()
+    def bvbrc_get_protein_properties_by_genome_id(genome_id: str, property_name: str, limit: int = _default_limit, select: Optional[str] = None, sort: Optional[str] = None) -> str:
+        """
+        Get proteins for a genome with a given ID that have a specific property.
+
+        Args:
+            genome_id: The genome ID to query
+            property_name: The property name to query (e.g. "Antibiotic Resistance" or "Virulence Factor")
+            limit: Maximum number of results to return (default: 1000)
+            select: Comma-separated list of fields to select (optional)
+            sort: Field to sort by (optional)
+        
+        Returns:
+            A list of the proteins for a genome with the given ID that have a specific property
+        """
+        print(f"Get protein properties for genome {genome_id} and property {property_name}")
+        options = {"limit": limit}
+        if select:
+            options["select"] = select.split(",")
+        if sort:
+            options["sort"] = sort
+
+        filter_spec = { "genome_id": genome_id, "property": property_name }
+
+        try:
+            result = query_sp_gene_by_filters(filter_spec, options, _base_url)
             return format_query_result(result)
         except Exception as e:
             message = f"Error querying genome amr data by drug and genome name: {str(e)}"
