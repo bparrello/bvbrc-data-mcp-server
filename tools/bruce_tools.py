@@ -439,6 +439,6 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             result = query_sp_gene_by_filters(filter_spec, options, _base_url)
             return format_query_result(result)
         except Exception as e:
-            message = f"Error querying genome amr data by drug and genome name: {str(e)}"
+            message = f"Error querying genome special proteins by genome ID and property name: {str(e)}"
             print(message)
             return message
