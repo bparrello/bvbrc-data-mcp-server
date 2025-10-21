@@ -33,7 +33,7 @@ def main() -> int:
         # Example test query for SP gene by filters
         options = {"limit": 1000}
 
-        filter_spec = { "genome_id": "1313.34299", "property": "\"Antibiotic Resistance\"" }
+        filter_spec = { "genome_id": "1313.34299" }
 
         result = query_sp_gene_by_filters(filter_spec, options, _base_url)
         print(format_query_result(result))

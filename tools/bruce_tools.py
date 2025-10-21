@@ -412,7 +412,7 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             return message
 
     @mcp.tool()
-    def bvbrc_get_protein_properties_by_genome_id(genome_id: str, property_name: str, limit: int = _default_limit, select: Optional[str] = None, sort: Optional[str] = None) -> str:
+    def bvbrc_get_protein_properties_by_genome_id(genome_id: str, property_name: str, limit: int = 6000, select: Optional[str] = None, sort: Optional[str] = None) -> str:
         """
         Get proteins for a genome with a given ID that have a specific property.
 
@@ -427,17 +427,35 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             A list of the proteins for a genome with the given ID that have a specific property
         """
         print(f"Get protein properties for genome {genome_id} and property {property_name}")
-        options = {"limit": limit}
+        # Insure the limit is high enough to get all results, since we have to filter on the back end.
+        # It will be very rare to have more than 6000 results for sp_gene in a single genome.
+        if limit < 6000:
+            fake_limit = 6000
+        else:
+            fake_limit = limit
+        options = {"limit": fake_limit}
         if select:
             options["select"] = select.split(",")
+            if not "property" in options["select"]:
+                options["select"].append("property")
         if sort:
             options["sort"] = sort
 
-        filter_spec = { "genome_id": genome_id, "property": property_name }
+        # Because we can't filter on properties directly, we filter on genome_id here 
+        # and filter on property after getting results.
+        filter_spec = { "genome_id": genome_id }
 
         try:
             result = query_sp_gene_by_filters(filter_spec, options, _base_url)
-            return format_query_result(result)
+            # Now filter results by property name
+            i = 0
+            filtered_results = []
+            while i < len(result) and len(filtered_results) < limit:
+                item = result[i]
+                if item["property"] == property_name:
+                    filtered_results.append(item)
+                i += 1
+            return format_query_result(filtered_results)
         except Exception as e:
             message = f"Error querying genome special proteins by genome ID and property name: {str(e)}"
             print(message)
