@@ -62,7 +62,7 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
 #        except Exception as e:
 #            return f"Error querying {core}: {str(e)}"
 
-    @mcp.tool()
+    @mcp.tool(access="READ")
     def bvbrc_genome_get_by_id(genome_id: str, limit: int = _default_limit, 
                               select: Optional[str] = None, sort: Optional[str] = None) -> str:
         """
@@ -93,7 +93,7 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             return message
 
 
-    @mcp.tool()
+    @mcp.tool(access="READ")
     def bvbrc_genome_get_by_genome_name(genome_name: str, limit: int = _default_limit,
                                          select: Optional[str] = None, sort: Optional[str] = None) -> str:
         """
@@ -124,7 +124,7 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             return message
 
 
-    @mcp.tool()
+    @mcp.tool(access="READ")
     def bvbrc_genome_get_by_species(species: str, limit: int = _default_limit,
                                    select: Optional[str] = None, sort: Optional[str] = None) -> str:
         """
@@ -154,8 +154,8 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             print(message)
             return message
 
-    
-    @mcp.tool()
+
+    @mcp.tool(access="READ")
     def bvbrc_genome_feature_get_by_id(feature_id: str, limit: int = _default_limit,
                                       select: Optional[str] = None, sort: Optional[str] = None) -> str:
         """
@@ -186,7 +186,7 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             return message
 
 
-    @mcp.tool()
+    @mcp.tool(access="READ")
     def bvbrc_genome_feature_get_by_genome_id(genome_id: str, limit: int = 6000,
                                              select: Optional[str] = None, sort: Optional[str] = None) -> str:
         """
@@ -217,7 +217,7 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             return message
 
 
-    @mcp.tool()
+    @mcp.tool(access="READ")
     def bvbrc_genome_feature_get_by_gene_in_genome(gene_name: str, genome_id: str, limit: int = _default_limit,
                                         select: Optional[str] = None, sort: Optional[str] = None) -> str:
         """
@@ -251,7 +251,7 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             return message
 
 
-    @mcp.tool()
+    @mcp.tool(access="READ")
     def bvbrc_genome_feature_get_by_product_in_genome(product_name: str, genome_id: str, limit: int = _default_limit,
                                            select: Optional[str] = None, sort: Optional[str] = None) -> str:
         """
@@ -284,7 +284,7 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             print(message)
             return message
 
-    @mcp.tool()
+    @mcp.tool(access="READ")
     def bvbrc_genome_amr_get_by_genome_id(genome_id: str, limit: int = _default_limit,
                                         select: Optional[str] = None, sort: Optional[str] = None) -> str:
         """
@@ -316,7 +316,7 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             print(message)
             return message
 
-    @mcp.tool()
+    @mcp.tool(access="READ")
     def bvbrc_genome_amr_get_by_drug(drug_name: str, limit: int = _default_limit,
                                         select: Optional[str] = None, sort: Optional[str] = None) -> str:
         """
@@ -348,7 +348,7 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             print(message)
             return message
 
-    @mcp.tool()
+    @mcp.tool(access="READ")
     def bvbrc_genome_amr_get_by_drug_and_genome_name(drug_name: str, genome_name: str, limit: int = _default_limit,
                                         select: Optional[str] = None, sort: Optional[str] = None) -> str:
         """
@@ -381,7 +381,7 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             print(message)
             return message
 
-    @mcp.tool()
+    @mcp.tool(access="READ")
     def bvbrc_genome_amr_get_drugs(limit: int = _default_limit, select: Optional[str] = None, sort: Optional[str] = None) -> str:
         """
         Get genome anti-microbial resistance drug names.
@@ -411,7 +411,7 @@ def register_bruce_tools(mcp: FastMCP, base_url: str, default_limit: int):
             print(message)
             return message
 
-    @mcp.tool()
+    @mcp.tool(access="READ")
     def bvbrc_get_protein_properties_by_genome_id(genome_id: str, property_name: str, limit: int = _default_limit, select: Optional[str] = None, sort: Optional[str] = None) -> str:
         """
         Get proteins for a genome with a given ID that have a specific property.
