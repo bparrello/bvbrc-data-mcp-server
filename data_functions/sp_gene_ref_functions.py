@@ -1,36 +1,58 @@
 """
 BV-BRC SP Gene Reference Functions
 
-This module provides wrapper functions for the BV-BRC Solr API sp_gene_ref resource,
-exposing SP gene reference querying capabilities through a simplified interface.
+This module provides SP gene reference querying functions for the BV-BRC Solr API.
 """
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 from .common_functions import create_bvbrc_client
 
 
 def query_sp_gene_ref_by_id(id: str, options: Dict[str, Any] = None,
-                           base_url: str = None, headers: Dict[str, str] = None) -> List[Dict[str, Any]]:
+                           base_url: str = None, headers: Dict[str, str] = None) -> Tuple[List[Dict[str, Any]], int]:
     """
-    Query SP gene reference by ID.
+    Query SP gene reference by ID using cursor-based streaming.
     
     Args:
         id: The ID to query
-        options: Optional query options
+        options: Optional query options (limit, select, sort, etc.)
         base_url: Optional base URL override
         headers: Optional headers override
         
     Returns:
-        List of SP gene reference records
+        Tuple of (list of SP gene reference records, count of results)
     """
     client = create_bvbrc_client(base_url, headers)
-    return client.sp_gene_ref.get_by_id(id, options or {})
+    options = options or {}
+    
+    # Build query expression for id (use q_expr instead of fq)
+    q_expr = f"id:{id}"
+    
+    # Convert limit to rows for cursor pagination
+    rows = options.get("limit", 1000)
+    if "limit" in options:
+        del options["limit"]
+    options["rows"] = rows
+    
+    pager = client.sp_gene_ref.stream_all_solr(
+        rows=options.get("rows", 1000),
+        sort=options.get("sort"),
+        fields=options.get("select"),
+        q_expr=q_expr,
+        context_overrides={"base_url": base_url, "headers": headers} if base_url or headers else None
+    )
+    
+    # Collect all results into a list
+    results = []
+    for doc in pager:
+        results.append(doc)
+    return results, len(results)
 
 
 def query_sp_gene_ref_by_filters(filters: Dict[str, Any], options: Dict[str, Any] = None,
-                                 base_url: str = None, headers: Dict[str, str] = None) -> List[Dict[str, Any]]:
+                                 base_url: str = None, headers: Dict[str, str] = None) -> Tuple[List[Dict[str, Any]], int]:
     """
-    Query SP gene reference by custom filters.
+    Query SP gene reference by custom filters using cursor-based streaming.
     
     Args:
         filters: Dictionary of filter criteria
@@ -39,16 +61,51 @@ def query_sp_gene_ref_by_filters(filters: Dict[str, Any], options: Dict[str, Any
         headers: Optional headers override
         
     Returns:
-        List of SP gene reference records
+        Tuple of (list of SP gene reference records, count of results)
     """
     client = create_bvbrc_client(base_url, headers)
-    return client.sp_gene_ref.query_by(filters, options or {})
+    options = options or {}
+    
+    # Build query expression from the filters dict
+    # For multiple filters, we need to combine them with AND logic
+    filter_parts = []
+    for key, value in filters.items():
+        if isinstance(value, str):
+            filter_parts.append(f'{key}:"{value}"')
+        else:
+            filter_parts.append(f"{key}:{value}")
+    
+    # Combine multiple filters with AND logic
+    if len(filter_parts) == 1:
+        q_expr = filter_parts[0]
+    else:
+        q_expr = " AND ".join(f"({part})" for part in filter_parts)
+    
+    # Convert limit to rows for cursor pagination
+    rows = options.get("limit", 1000)
+    if "limit" in options:
+        del options["limit"]
+    options["rows"] = rows
+    
+    pager = client.sp_gene_ref.stream_all_solr(
+        rows=options.get("rows", 1000),
+        sort=options.get("sort"),
+        fields=options.get("select"),
+        q_expr=q_expr,
+        context_overrides={"base_url": base_url, "headers": headers} if base_url or headers else None
+    )
+    
+    # Collect all results into a list
+    results = []
+    for doc in pager:
+        results.append(doc)
+    return results, len(results)
 
 
 def query_sp_gene_ref_by_antibiotics(antibiotics: str, options: Dict[str, Any] = None,
-                                    base_url: str = None, headers: Dict[str, str] = None) -> List[Dict[str, Any]]:
+                                    base_url: str = None, headers: Dict[str, str] = None) -> Tuple[List[Dict[str, Any]], int]:
     """
-    Query SP gene reference by antibiotics.
+    Query SP gene reference by antibiotics using cursor-based streaming.
     
     Args:
         antibiotics: The antibiotics to query
@@ -57,16 +114,39 @@ def query_sp_gene_ref_by_antibiotics(antibiotics: str, options: Dict[str, Any] =
         headers: Optional headers override
         
     Returns:
-        List of SP gene reference records
+        Tuple of (list of SP gene reference records, count of results)
     """
     client = create_bvbrc_client(base_url, headers)
-    return client.sp_gene_ref.get_by_antibiotics(antibiotics, options or {})
+    options = options or {}
+    
+    # Build query expression for antibiotics (use q_expr instead of fq)
+    q_expr = f'antibiotics:"{antibiotics}"'
+    
+    # Convert limit to rows for cursor pagination
+    rows = options.get("limit", 1000)
+    if "limit" in options:
+        del options["limit"]
+    options["rows"] = rows
+    
+    pager = client.sp_gene_ref.stream_all_solr(
+        rows=options.get("rows", 1000),
+        sort=options.get("sort"),
+        fields=options.get("select"),
+        q_expr=q_expr,
+        context_overrides={"base_url": base_url, "headers": headers} if base_url or headers else None
+    )
+    
+    # Collect all results into a list
+    results = []
+    for doc in pager:
+        results.append(doc)
+    return results, len(results)
 
 
 def query_sp_gene_ref_by_gene_symbol(gene_symbol: str, options: Dict[str, Any] = None,
-                                     base_url: str = None, headers: Dict[str, str] = None) -> List[Dict[str, Any]]:
+                                     base_url: str = None, headers: Dict[str, str] = None) -> Tuple[List[Dict[str, Any]], int]:
     """
-    Query SP gene reference by gene symbol.
+    Query SP gene reference by gene symbol using cursor-based streaming.
     
     Args:
         gene_symbol: The gene symbol to query
@@ -75,16 +155,39 @@ def query_sp_gene_ref_by_gene_symbol(gene_symbol: str, options: Dict[str, Any] =
         headers: Optional headers override
         
     Returns:
-        List of SP gene reference records
+        Tuple of (list of SP gene reference records, count of results)
     """
     client = create_bvbrc_client(base_url, headers)
-    return client.sp_gene_ref.get_by_gene_symbol(gene_symbol, options or {})
+    options = options or {}
+    
+    # Build query expression for gene_symbol (use q_expr instead of fq)
+    q_expr = f'gene_symbol:"{gene_symbol}"'
+    
+    # Convert limit to rows for cursor pagination
+    rows = options.get("limit", 1000)
+    if "limit" in options:
+        del options["limit"]
+    options["rows"] = rows
+    
+    pager = client.sp_gene_ref.stream_all_solr(
+        rows=options.get("rows", 1000),
+        sort=options.get("sort"),
+        fields=options.get("select"),
+        q_expr=q_expr,
+        context_overrides={"base_url": base_url, "headers": headers} if base_url or headers else None
+    )
+    
+    # Collect all results into a list
+    results = []
+    for doc in pager:
+        results.append(doc)
+    return results, len(results)
 
 
 def query_sp_gene_ref_by_source(source: str, options: Dict[str, Any] = None,
-                                base_url: str = None, headers: Dict[str, str] = None) -> List[Dict[str, Any]]:
+                                base_url: str = None, headers: Dict[str, str] = None) -> Tuple[List[Dict[str, Any]], int]:
     """
-    Query SP gene reference by source.
+    Query SP gene reference by source using cursor-based streaming.
     
     Args:
         source: The source to query
@@ -93,16 +196,39 @@ def query_sp_gene_ref_by_source(source: str, options: Dict[str, Any] = None,
         headers: Optional headers override
         
     Returns:
-        List of SP gene reference records
+        Tuple of (list of SP gene reference records, count of results)
     """
     client = create_bvbrc_client(base_url, headers)
-    return client.sp_gene_ref.get_by_source(source, options or {})
+    options = options or {}
+    
+    # Build query expression for source (use q_expr instead of fq)
+    q_expr = f'source:"{source}"'
+    
+    # Convert limit to rows for cursor pagination
+    rows = options.get("limit", 1000)
+    if "limit" in options:
+        del options["limit"]
+    options["rows"] = rows
+    
+    pager = client.sp_gene_ref.stream_all_solr(
+        rows=options.get("rows", 1000),
+        sort=options.get("sort"),
+        fields=options.get("select"),
+        q_expr=q_expr,
+        context_overrides={"base_url": base_url, "headers": headers} if base_url or headers else None
+    )
+    
+    # Collect all results into a list
+    results = []
+    for doc in pager:
+        results.append(doc)
+    return results, len(results)
 
 
 def query_sp_gene_ref_by_taxon_id(taxon_id: int, options: Dict[str, Any] = None,
-                                 base_url: str = None, headers: Dict[str, str] = None) -> List[Dict[str, Any]]:
+                                 base_url: str = None, headers: Dict[str, str] = None) -> Tuple[List[Dict[str, Any]], int]:
     """
-    Query SP gene reference by taxon ID.
+    Query SP gene reference by taxon ID using cursor-based streaming.
     
     Args:
         taxon_id: The taxon ID to query
@@ -111,16 +237,39 @@ def query_sp_gene_ref_by_taxon_id(taxon_id: int, options: Dict[str, Any] = None,
         headers: Optional headers override
         
     Returns:
-        List of SP gene reference records
+        Tuple of (list of SP gene reference records, count of results)
     """
     client = create_bvbrc_client(base_url, headers)
-    return client.sp_gene_ref.get_by_taxon_id(taxon_id, options or {})
+    options = options or {}
+    
+    # Build query expression for taxon_id (use q_expr instead of fq)
+    q_expr = f"taxon_id:{taxon_id}"
+    
+    # Convert limit to rows for cursor pagination
+    rows = options.get("limit", 1000)
+    if "limit" in options:
+        del options["limit"]
+    options["rows"] = rows
+    
+    pager = client.sp_gene_ref.stream_all_solr(
+        rows=options.get("rows", 1000),
+        sort=options.get("sort"),
+        fields=options.get("select"),
+        q_expr=q_expr,
+        context_overrides={"base_url": base_url, "headers": headers} if base_url or headers else None
+    )
+    
+    # Collect all results into a list
+    results = []
+    for doc in pager:
+        results.append(doc)
+    return results, len(results)
 
 
 def query_sp_gene_ref_by_date_inserted_range(start_date: str, end_date: str, options: Dict[str, Any] = None,
-                                             base_url: str = None, headers: Dict[str, str] = None) -> List[Dict[str, Any]]:
+                                             base_url: str = None, headers: Dict[str, str] = None) -> Tuple[List[Dict[str, Any]], int]:
     """
-    Query SP gene reference by date inserted range.
+    Query SP gene reference by date inserted range using cursor-based streaming.
     
     Args:
         start_date: Start date in YYYY-MM-DD format
@@ -130,16 +279,39 @@ def query_sp_gene_ref_by_date_inserted_range(start_date: str, end_date: str, opt
         headers: Optional headers override
         
     Returns:
-        List of SP gene reference records
+        Tuple of (list of SP gene reference records, count of results)
     """
     client = create_bvbrc_client(base_url, headers)
-    return client.sp_gene_ref.get_by_date_inserted_range(start_date, end_date, options or {})
+    options = options or {}
+    
+    # Build query expression for date_inserted range (use q_expr instead of fq)
+    q_expr = f'date_inserted:[{start_date} TO {end_date}]'
+    
+    # Convert limit to rows for cursor pagination
+    rows = options.get("limit", 1000)
+    if "limit" in options:
+        del options["limit"]
+    options["rows"] = rows
+    
+    pager = client.sp_gene_ref.stream_all_solr(
+        rows=options.get("rows", 1000),
+        sort=options.get("sort"),
+        fields=options.get("select"),
+        q_expr=q_expr,
+        context_overrides={"base_url": base_url, "headers": headers} if base_url or headers else None
+    )
+    
+    # Collect all results into a list
+    results = []
+    for doc in pager:
+        results.append(doc)
+    return results, len(results)
 
 
 def query_sp_gene_ref_by_date_modified_range(start_date: str, end_date: str, options: Dict[str, Any] = None,
-                                             base_url: str = None, headers: Dict[str, str] = None) -> List[Dict[str, Any]]:
+                                             base_url: str = None, headers: Dict[str, str] = None) -> Tuple[List[Dict[str, Any]], int]:
     """
-    Query SP gene reference by date modified range.
+    Query SP gene reference by date modified range using cursor-based streaming.
     
     Args:
         start_date: Start date in YYYY-MM-DD format
@@ -149,16 +321,39 @@ def query_sp_gene_ref_by_date_modified_range(start_date: str, end_date: str, opt
         headers: Optional headers override
         
     Returns:
-        List of SP gene reference records
+        Tuple of (list of SP gene reference records, count of results)
     """
     client = create_bvbrc_client(base_url, headers)
-    return client.sp_gene_ref.get_by_date_modified_range(start_date, end_date, options or {})
+    options = options or {}
+    
+    # Build query expression for date_modified range (use q_expr instead of fq)
+    q_expr = f'date_modified:[{start_date} TO {end_date}]'
+    
+    # Convert limit to rows for cursor pagination
+    rows = options.get("limit", 1000)
+    if "limit" in options:
+        del options["limit"]
+    options["rows"] = rows
+    
+    pager = client.sp_gene_ref.stream_all_solr(
+        rows=options.get("rows", 1000),
+        sort=options.get("sort"),
+        fields=options.get("select"),
+        q_expr=q_expr,
+        context_overrides={"base_url": base_url, "headers": headers} if base_url or headers else None
+    )
+    
+    # Collect all results into a list
+    results = []
+    for doc in pager:
+        results.append(doc)
+    return results, len(results)
 
 
 def query_sp_gene_ref_by_keyword(keyword: str, options: Dict[str, Any] = None,
-                                 base_url: str = None, headers: Dict[str, str] = None) -> List[Dict[str, Any]]:
+                                 base_url: str = None, headers: Dict[str, str] = None) -> Tuple[List[Dict[str, Any]], int]:
     """
-    Search SP gene reference by keyword.
+    Query SP gene reference by keyword using cursor-based streaming.
     
     Args:
         keyword: The keyword to search for
@@ -167,16 +362,39 @@ def query_sp_gene_ref_by_keyword(keyword: str, options: Dict[str, Any] = None,
         headers: Optional headers override
         
     Returns:
-        List of SP gene reference records
+        Tuple of (list of SP gene reference records, count of results)
     """
     client = create_bvbrc_client(base_url, headers)
-    return client.sp_gene_ref.search_by_keyword(keyword, options or {})
+    options = options or {}
+    
+    # Build query expression for keyword search (use q_expr instead of fq)
+    q_expr = f'*{keyword}*'
+    
+    # Convert limit to rows for cursor pagination
+    rows = options.get("limit", 1000)
+    if "limit" in options:
+        del options["limit"]
+    options["rows"] = rows
+    
+    pager = client.sp_gene_ref.stream_all_solr(
+        rows=options.get("rows", 1000),
+        sort=options.get("sort"),
+        fields=options.get("select"),
+        q_expr=q_expr,
+        context_overrides={"base_url": base_url, "headers": headers} if base_url or headers else None
+    )
+    
+    # Collect all results into a list
+    results = []
+    for doc in pager:
+        results.append(doc)
+    return results, len(results)
 
 
 def query_sp_gene_ref_all(options: Dict[str, Any] = None,
-                          base_url: str = None, headers: Dict[str, str] = None) -> List[Dict[str, Any]]:
+                          base_url: str = None, headers: Dict[str, str] = None) -> Tuple[List[Dict[str, Any]], int]:
     """
-    Get all SP gene reference data.
+    Query all SP gene reference data using cursor-based streaming.
     
     Args:
         options: Optional query options
@@ -184,7 +402,27 @@ def query_sp_gene_ref_all(options: Dict[str, Any] = None,
         headers: Optional headers override
         
     Returns:
-        List of all SP gene reference records
+        Tuple of (list of SP gene reference records, count of results)
     """
     client = create_bvbrc_client(base_url, headers)
-    return client.sp_gene_ref.get_all(options or {})
+    options = options or {}
+    
+    # Convert limit to rows for cursor pagination
+    rows = options.get("limit", 1000)
+    if "limit" in options:
+        del options["limit"]
+    options["rows"] = rows
+    
+    pager = client.sp_gene_ref.stream_all_solr(
+        rows=options.get("rows", 1000),
+        sort=options.get("sort"),
+        fields=options.get("select"),
+        q_expr="*:*",  # Match all documents
+        context_overrides={"base_url": base_url, "headers": headers} if base_url or headers else None
+    )
+    
+    # Collect all results into a list
+    results = []
+    for doc in pager:
+        results.append(doc)
+    return results, len(results)

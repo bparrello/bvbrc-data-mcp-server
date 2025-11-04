@@ -5,7 +5,7 @@ This module provides common utility functions for the BV-BRC Solr API.
 """
 
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 from bvbrc_solr_api import create_client, query
 
 
@@ -30,9 +30,9 @@ def create_bvbrc_client(base_url: str = None, headers: Dict[str, str] = None) ->
 
 
 def query_direct(core: str, filter_str: str = "", options: Dict[str, Any] = None,
-                base_url: str = None, headers: Dict[str, str] = None) -> List[Dict[str, Any]]:
+                base_url: str = None, headers: Dict[str, str] = None) -> Tuple[List[Dict[str, Any]], int]:
     """
-    Query BV-BRC data directly using core name and filter string.
+    Query BV-BRC data directly using core name and filter string with cursor-based streaming.
     
     Args:
         core: The core/collection name (e.g., "genome", "genome_feature")
@@ -42,15 +42,31 @@ def query_direct(core: str, filter_str: str = "", options: Dict[str, Any] = None
         headers: Optional headers override
         
     Returns:
-        List of records from the specified core
+        Tuple of (list of records from the specified core, count of results)
     """
-    context_overrides = {}
-    if base_url:
-        context_overrides["base_url"] = base_url
-    if headers:
-        context_overrides["headers"] = headers
+    client = create_bvbrc_client(base_url, headers)
+    options = options or {}
     
-    return query(core, filter_str, options or {}, context_overrides)
+    # Convert limit to rows for cursor pagination
+    rows = options.get("limit", 1000)
+    if "limit" in options:
+        del options["limit"]
+    options["rows"] = rows
+    
+    # Use stream_all_solr for cursor-based streaming
+    pager = getattr(client, core).stream_all_solr(
+        rows=options.get("rows", 1000),
+        sort=options.get("sort"),
+        fields=options.get("select"),
+        q_expr=filter_str if filter_str else "*:*",
+        context_overrides={"base_url": base_url, "headers": headers} if base_url or headers else None
+    )
+    
+    # Collect all results into a list
+    results = []
+    for doc in pager:
+        results.append(doc)
+    return results, len(results)
 
 
 def format_query_result(result: List[Dict[str, Any]], max_items: int = 10) -> str:

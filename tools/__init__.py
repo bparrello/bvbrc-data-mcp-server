@@ -4,7 +4,6 @@ BV-BRC MCP Tools
 This module contains all MCP tool registration functions for the BV-BRC data server.
 """
 
-from .bruce_tools import register_bruce_tools
 from .genome_tools import register_genome_tools
 from .genome_feature_tools import register_genome_feature_tools
 from .antibiotics_tools import register_antibiotics_tools
@@ -41,7 +40,6 @@ from .taxonomy_tools import register_taxonomy_tools
 from .common_tools import register_common_tools
 
 __all__ = [
-	'register_bruce_tools',
     'register_genome_tools',
     'register_genome_feature_tools',
     'register_antibiotics_tools',

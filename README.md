@@ -54,9 +54,11 @@ The server uses a `config.json` file for configuration:
 
 ```json
 {
-    "base_url": "https://www.bv-brc.org/api",
+    "base_url": "https://www.bv-brc.org/api-bulk",
+    "mcp_url": "127.0.0.1",
     "port": 8059,
-    "default_limit": 1000
+    "default_limit": 1000,
+    "auth_url": "https://user.patricbrc.org/authenticate"
 }
 ```
 
@@ -65,10 +67,27 @@ The server uses a `config.json` file for configuration:
 Run the MCP server:
 
 ```bash
-python server.py
+python http_server.py
 ```
 
 The server will start on port 8059 (configurable in `config.json`).
+
+OR set mcp server config file for Claude and Cursor:
+
+```
+{
+  "mcpServers": {
+    "bvbrc-data": {
+      "command": "/path/to/python3",
+      "args": ["/path/to/bvbrc-data-mcp-server/stdio_server.py"],
+      "env": {
+        "BVBRC_BASE_URL": "https://www.bv-brc.org/api-bulk",
+        "BVBRC_DEFAULT_LIMIT": "1000"
+      }
+    }
+  }
+}
+```
 
 ## Health Check
 
